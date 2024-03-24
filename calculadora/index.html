@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <style>
+        .calculadora {
+            width: 150px;
+        }
+        
+        .linha {
+            display: flex;
+        }
+        
+        button {
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+            border: none;
+            background-color: #d8d0e5;
+            margin: 1px;
+        }
+        
+        button:hover {
+            color: white;
+            background-color: #9c65cb;
+        }
+        
+        button:active {
+            color: white;
+            background-color: #4b0f80;
+            transform: translateY(1px);
+        }
+        
+        .operador {
+            color: #ffffff;
+            background-color: #e38d7b;
+        }
+        
+        .igual {
+            color: white;
+            background-color: #4374be;
+        }
+        
+        .display {
+            display: flex;
+            justify-content: end;
+            height: 30px;
+            margin-right: 5px;
+        }
+    </style>
+    <div id="app">
+        <div class="calculadora">
+            <div class="display">
+                <!-- Mostra o valor atual -->
+                {{ display }}
+            </div>
+            <div class="linha">
+                <button class="operador" @click="lidarBotao('AC')">AC</button>
+            </div>
+            <div class="linha">
+                <button @click="lidarBotao('7')">7</button>
+                <!-- Botão 7 -->
+                <button @click="lidarBotao('8')">8</button>
+                <!-- Botão 8 -->
+                <button @click="lidarBotao('9')">9</button>
+                <!-- Botão 9 -->
+                <button class="operador" @click="lidarBotao('/')">/</button>
+                <!-- Botão /-->
+            </div>
+            <div class="linha">
+                <button @click="lidarBotao('4')">4</button>
+                <!-- Botão 4 -->
+                <button @click="lidarBotao('5')">5</button>
+                <!-- Botão 5 -->
+                <button @click="lidarBotao('6')">6</button>
+                <!-- Botão 6 -->
+                <button class="operador" @click="lidarBotao('*')">x</button>
+                <!-- Botão * -->
+            </div>
+            <div class="linha">
+                <button @click="lidarBotao('1')">1</button>
+                <!-- Botão 1 -->
+                <button @click="lidarBotao('2')">2</button>
+                <!-- Botão 2 -->
+                <button @click="lidarBotao('3')">3</button>
+                <!-- Botão 3 -->
+                <button class="operador" @click="lidarBotao('-')">-</button>
+                <!-- Botão - -->
+            </div>
+            <div class="linha">
+                <button @click="lidarBotao('.')">.</button>
+                <!-- Botão . -->
+                <button @click="lidarBotao('0')">0</button>
+                <!-- Botão 0 -->
+                <button class="igual" @click="lidarBotao('=')">=</button>
+                <!-- Botão = -->
+                <button class="operador" @click="lidarBotao('+')">+</button>
+                <!-- Botão + -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    const { createApp } = Vue
+
+    createApp({
+        data() {
+            return {
+                display: '0',
+                numeroAtual: null,
+                numeroAnterior: null,
+                operador: null,
+                operadorAtual: null,
+            }
+        },
+        methods: {
+            lidarBotao(botao) {
+                if (botao === '.' && this.numeroAtual !== null && this.numeroAtual.toString().includes('.')) {
+                    return
+                }
+                // Se botao for um número
+                if (botao >= '0' && botao <= '9') {
+                    if (this.numeroAtual === null) {
+                        this.numeroAtual = parseFloat(botao)
+                    } else {
+                        this.numeroAtual = parseFloat(`${this.numeroAtual}${botao}`)
+                    }
+                    this.display = this.numeroAtual
+                // Se botao for um operador
+                } else if (botao === '.' && this.numeroAtual === null) {
+                    this.numeroAtual = '0.'
+                    this.display = this.numeroAtual
+                } else if (botao === '+' || botao === '-' || botao === '*' || botao === '/') {                
+                if (this.operadorAtual !== null) {
+                    // Calcula o resultado
+                        this.lidarIgual()
+                    }
+                    // Salva o número anterior
+                    this.numeroAnterior = this.numeroAtual
+                    // Define o novo operador
+                    this.operador = botao
+                    // Salva o operador atual
+                    this.operadorAtual = botao
+                    // Salva o número atual
+                    this.numeroAtual = null
+                    // Exibe o número anterior
+                    this.display = this.numeroAnterior
+
+                // Botão "Limpar"
+                } else if (botao === 'AC') {
+                    this.numeroAtual = null
+                    this.numeroAnterior = null
+                    this.operador = null
+                    this.operadorAtual = null
+                    // Exibe 0
+                    this.display= '0'
+                // Botão "Igual"
+                } else if (botao === '=') {
+                    // Calcula o resultado
+                    this.lidarIgual()
+                }
+            },
+            lidarOperador(operador) {
+                if (this.operadorAtual !== null) {
+                    this.lidarIgual()
+                }
+                this.numeroAnterior = this.numeroAtual
+                this.operador = operador
+                this.operadorAtual = operador
+                this.numeroAtual = null
+                this.display = this.numeroAnterior
+            },
+            lidarDecimal() {
+                // Se o número for nulo
+                if (this.numeroAtual === null) {
+                    this.numeroAtual = '0.'
+                // Se o número não for nulo
+                } else if (this.numeroAtual !== null && this.numeroAtual.toString().includes('.')=== false) {
+                    this.numeroAtual = parseFloat(`${this.numeroAtual}.`)
+                } else if (this.numeroAtual !== null && this.numeroAtual.toString().includes('.')) {
+                    return
+                }
+                this.display = this.numeroAtual
+            },
+            lidarIgual() {
+                // Se o operador atual não for nulo
+                if (this.operadorAtual !== null) {
+                    // Calcula o resultado
+                    switch (this.operadorAtual) {
+                        case '+':
+                            this.numeroAtual = this.numeroAnterior + this.numeroAtual
+                            break
+                        case '-':
+                            this.numeroAtual = this.numeroAnterior - this.numeroAtual
+                            break
+                        case '*':
+                            this.numeroAtual = this.numeroAnterior * this.numeroAtual
+                            break
+                        case '/':
+                            if (this.numeroAtual === 0) {
+                                this.numeroAtual = null
+                                this.numeroAnterior = null
+                                this.operador = null
+                                this.operadorAtual = null
+                                this.display = 'Error'
+                                return
+                            }
+                            this.numeroAtual = this.numeroAnterior / this.numeroAtual
+                            break
+                    }
+                    this.numeroAnterior = null
+                }
+                this.operadorAtual = null
+                this.display = this.numeroAtual
+            },
+        }
+    }).mount("#app")
+</script>
